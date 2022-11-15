@@ -1,4 +1,4 @@
-# Entrega 5 Lautaro Demonte
+# Entrega 6 Lautaro Demonte
 
 ## Configuracion
 
@@ -11,7 +11,3 @@ Hacer en la consola:
 ```sh
 npm run dev
 ```
-
-#### Eleccion entre los lenguajes
-
-Creo que entre los tres lenguajes el que mas me gusta es Handlebars. Me parece que es en el cual mas se puede separar la logica de la vista y ademas se puede pasar templates a funciones de JS. Ademas me parece muchisimo mas intuitivo y dinamico que los otros dos.
