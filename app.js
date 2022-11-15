@@ -1,10 +1,17 @@
+/* Importacion de librerias internas y externas */
 const express = require("express");
+const { Server: HttpServer } = require("http");
+const { Server: IOServer } = require("socket.io");
 const bp = require("body-parser");
 const routers = require("./routers");
 const handlebars = require("express-handlebars");
 const Contenedor = require("./controllers/productsController");
 const productos = new Contenedor("./controllers/productos.json");
+
+/* Inicializacion de la configuracion */
 const app = express();
+const httpServer = new HttpServer(app);
+const io = new IOServer(httpServer);
 const PORT = 8080;
 
 /* middlewares incorporados */
@@ -42,10 +49,10 @@ app.post("/", async (req, res) => {
     res.status(201).render("formulario", {});
 });
 
-const server = app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(
-        `Servidor http escuchando en el puerto ${server.address().port}`
+        `Servidor http escuchando en el puerto ${httpServer.address().port}`
     );
-    console.log(`http://localhost:${server.address().port}`);
+    console.log(`http://localhost:${httpServer.address().port}`);
 });
-server.on("error", error => console.log(`Error en servidor: ${error}`));
+httpServer.on("error", error => console.log(`Error en servidor: ${error}`));
