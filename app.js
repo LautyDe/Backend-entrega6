@@ -3,9 +3,10 @@ const express = require("express");
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
 const bp = require("body-parser");
-const routers = require("./routers");
+const routers = require("./public/routers");
 const handlebars = require("express-handlebars");
-const Contenedor = require("./controllers/productsController");
+const Contenedor = require("./controllers/controller");
+const moment = require("moment/moment");
 const productos = new Contenedor("./controllers/productos.json");
 
 /* Inicializacion de la configuracion */
@@ -13,6 +14,7 @@ const app = express();
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
 const PORT = 8080;
+const messages = new Contenedor("./controllers/mensajes.json");
 
 /* middlewares incorporados */
 app.use(bp.json());
@@ -34,9 +36,9 @@ app.use("/", routers);
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-    res.render("formulario", {
-        style: "formulario.css",
-        title: "Formulario Handlebars",
+    res.render("welcome", {
+        style: "welcome.css",
+        title: "Bienvenido",
     });
 });
 
@@ -56,3 +58,26 @@ httpServer.listen(PORT, () => {
     console.log(`http://localhost:${httpServer.address().port}`);
 });
 httpServer.on("error", error => console.log(`Error en servidor: ${error}`));
+
+io.on("connection", async socket => {
+    console.log("Nuevo cliente conectado");
+
+    /* cargar los productos */
+    const listaProductos = await productos.getAll();
+    socket.emit("new-connection", listaProductos);
+    socket.on("new-product", data => {
+        productos.save(data);
+        io.sockets.emit("producto", data);
+    });
+
+    /* cargar todos los mensajes a la primera conexion */
+    const listaMensajes = await messages.getAll();
+    socket.emit("messages", listaMensajes);
+    socket.emit("messages", messages);
+
+    socket.on("new-message", async data => {
+        data.time = moment(new Date()).format("DD/MM/YYYY hh:mm:ss");
+        await messages.save(data);
+        io.sockets.emit("messages", messages);
+    });
+});
